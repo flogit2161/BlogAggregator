@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"os"
 
 	"github.com/flogit2161/BlogAggregator/internal/config"
+	"github.com/flogit2161/BlogAggregator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -12,7 +15,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Could not read from config")
 	}
+
+	db, err := sql.Open("postgres", config.DbURL)
+	if err != nil {
+		log.Fatal("Couldnt load database")
+	}
+	dbQueries := database.New(db)
 	cfgState := &state{
+		db:  dbQueries,
 		cfg: &config,
 	}
 
@@ -20,6 +30,7 @@ func main() {
 		handlers: make(map[string]func(*state, command) error),
 	}
 	commands.register("login", handlerLogin)
+	commands.register("register", handlerRegister)
 
 	args := os.Args
 	if len(args) < 2 {
