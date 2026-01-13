@@ -76,6 +76,30 @@ func handlerRegister(s *state, cmd command) error {
 	return nil
 }
 
+func handlerReset(s *state, cmd command) error {
+	err := s.db.ResetUsers(context.Background())
+	if err != nil {
+		return errors.New("Error reseting the users table")
+	}
+	fmt.Println("Users table successfully reseted")
+	return nil
+}
+
+func handlerUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return errors.New("Could not get users from table")
+	}
+	for _, user := range users {
+		if user.Name == s.cfg.CurrentUserName {
+			fmt.Printf("* %s (current)\n", user.Name)
+			continue
+		}
+		fmt.Printf("* %s\n", user.Name)
+	}
+	return nil
+}
+
 func (c *commands) run(s *state, cmd command) error {
 	handler, exists := c.handlers[cmd.name]
 	if !exists {
