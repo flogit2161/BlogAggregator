@@ -111,6 +111,48 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.args) < 2 {
+		return errors.New("Please enter at least 2 arguments for command to work (name, url)")
+	}
+	name := cmd.args[0]
+	url := cmd.args[1]
+	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		return errors.New("Could'nt access user, try logging in again")
+	}
+	feed, err := s.db.CreateFeed(
+		context.Background(),
+		database.CreateFeedParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Name:      name,
+			Url:       url,
+			UserID:    user.ID,
+		},
+	)
+	if err != nil {
+		return errors.New("Error creating feed")
+	}
+	fmt.Println("Successfully created feed")
+	printFeed(feed)
+
+	return nil
+
+}
+
+func handlerFeed(s *state, cmd command) error {
+	feeds, err := s.db.GetFeedsWithUsers(context.Background())
+	if err != nil {
+		return errors.New("Could not access feeds in db")
+	}
+	for _, f := range feeds {
+		fmt.Printf("%s\n%s\n%s\n", f.Name, f.Url, f.Name_2)
+	}
+	return nil
+}
+
 func (c *commands) run(s *state, cmd command) error {
 	handler, exists := c.handlers[cmd.name]
 	if !exists {
@@ -121,4 +163,13 @@ func (c *commands) run(s *state, cmd command) error {
 
 func (c *commands) register(name string, f func(*state, command) error) {
 	c.handlers[name] = f
+}
+
+func printFeed(feed database.Feed) {
+	fmt.Printf("ID : %v\n", feed.ID)
+	fmt.Printf("Created at: %v\n", feed.CreatedAt)
+	fmt.Printf("Updated at: %v\n", feed.UpdatedAt)
+	fmt.Printf("Name: %v\n", feed.Name)
+	fmt.Printf("URL: %v\n", feed.Url)
+	fmt.Printf("User ID: %v\n", feed.UserID)
 }
