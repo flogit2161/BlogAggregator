@@ -136,8 +136,23 @@ func handlerAddFeed(s *state, cmd command) error {
 		return errors.New("Error creating feed")
 	}
 	fmt.Println("Successfully created feed")
-	printFeed(feed)
 
+	follow, err := s.db.CreateFeedFollow(
+		context.Background(),
+		database.CreateFeedFollowParams{
+			ID:        uuid.New(),
+			CreatedAt: feed.CreatedAt,
+			UpdatedAt: feed.UpdatedAt,
+			UserID:    feed.UserID,
+			FeedID:    feed.ID,
+		},
+	)
+	if err != nil {
+		return errors.New("Could not assign feed to users following")
+	}
+	fmt.Println("Feed added to user's follows")
+	fmt.Printf("User ID : %s\n", follow.UserID)
+	fmt.Printf("Feed name : %s\n", follow.FeedName)
 	return nil
 
 }
@@ -149,6 +164,53 @@ func handlerFeed(s *state, cmd command) error {
 	}
 	for _, f := range feeds {
 		fmt.Printf("%s\n%s\n%s\n", f.Name, f.Url, f.Name_2)
+	}
+	return nil
+}
+
+func handlerFollow(s *state, cmd command) error {
+	url := cmd.args[0]
+	feed, err := s.db.GetFeedByURL(context.Background(), url)
+	if err != nil {
+		return errors.New("Couldnt access feed via URL")
+	}
+
+	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		return errors.New("Could not acces logged in user")
+	}
+
+	followedFeed, err := s.db.CreateFeedFollow(
+		context.Background(),
+		database.CreateFeedFollowParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			UserID:    user.ID,
+			FeedID:    feed.ID,
+		},
+	)
+	if err != nil {
+		return errors.New("Could not create feed")
+	}
+	fmt.Println("Feed record created successfully")
+	fmt.Printf("Username : %s\n", followedFeed.UserName)
+	fmt.Printf("Feedname : %s\n", followedFeed.FeedName)
+
+	return nil
+}
+
+func handlerFollowing(s *state, cmd command) error {
+	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
+	if err != nil {
+		return errors.New("Couldn not access logged in user")
+	}
+	follows, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
+	if err != nil {
+		return errors.New("Could not access followed feeds")
+	}
+	for _, f := range follows {
+		fmt.Println(f.FeedName)
 	}
 	return nil
 }
