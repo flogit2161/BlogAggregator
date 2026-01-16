@@ -86,14 +86,17 @@ func handlerUsers(s *state, cmd command) error {
 }
 
 func handlerAgg(s *state, cmd command) error {
-	url := "https://www.wagslane.dev/index.xml"
-
-	feed, err := fetchFeed(context.Background(), url)
+	timeString := cmd.args[0]
+	time_between_reqs, err := time.ParseDuration(timeString)
 	if err != nil {
-		return errors.New("Error accessing the RSSFeed requested")
+		return errors.New("Could not convert arg to time duration")
 	}
-	fmt.Println(feed)
-	return nil
+	fmt.Printf("Collecting feeds every %v\n Please press CTRL + C to kill program", time_between_reqs)
+	ticker := time.NewTicker(time_between_reqs)
+	for ; ; <-ticker.C {
+		scrapeFeeds(s)
+	}
+
 }
 
 func handlerAddFeed(s *state, cmd command, user database.User) error {
