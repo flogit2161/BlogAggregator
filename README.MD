@@ -28,10 +28,16 @@ go version
 
 ### 2. Install PostgreSQL
 
-Install **Postgres** using the method appropriate for your operating system.
+**Postgres install commands**
 
-sudo apt install postgresql postgresql-contrib --- Linux
-sudo apt install postgresql postgresql-contrib --- MacOS
+Linux (Debian/Ubuntu):
+
+```bash
+sudo apt install postgresql postgresql-contrib```
+
+MacOS:
+```bash
+brew install postgresql@15```
 
 After installation, ensure it is available in your PATH and can be started from the command line.
 
@@ -104,7 +110,7 @@ cd <your-repo>
 From the project root directory, run the migration files to initialize the database schema:
 
 ```
-psql "<database-url>" -f migrations/001_init.sql
+goose -dir ./sql/schema postgres "$DATABASE_URL" up
 ```
 
 
@@ -112,32 +118,33 @@ psql "<database-url>" -f migrations/001_init.sql
 
 Install the application using Go:
 
-```
-go install
-```
-
-Or build a local binary:
-
-```
-go build
-```
-
-Run the compiled binary:
-
-```
-./<binary-name>
-```
-
-## Running the Project
+```bash
+go install github.com/flogit2161/BlogAggregator@latest
 
 If installed via `go install`, run:
 
 ```
-<binary-name>
+BlogAggregator register "username"
 ```
 
 If running from source:
 
 ```
-go run .
-``
+go run . register "username"
+```
+
+## How to use
+
+Run register with your username and start adding feeds to follow, you can then browse your feed and aggregate them to get their RSS
+
+## Cmds List
+- register - creates and logs in user
+- login - log in with user created beforehand when reusing program
+- users - check all users available
+- feed - get feeds for user
+- addfeed - add a feed
+- follow - follow a feed
+- following - check followed feeds 
+- unfollow - unfollow feed
+- agg - aggregates followed feeds
+- browse - browse aggregated feeds
