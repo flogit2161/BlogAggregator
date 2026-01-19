@@ -43,7 +43,7 @@ brew install postgresql@15
 
 After installation, ensure it is available in your PATH and can be started from the command line.
 
-### 2. Install Goose
+### 3. Install Goose
 
 Goose is used to run the migration but you are free to use whatever tool 
 you prefer
@@ -56,7 +56,7 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 
 Run goose -version to make sure it's installed correctly.
 
-### 3. Create the PostgreSQL database
+### 4. Create the PostgreSQL database
 
 Ensure PostgreSQL is running, then create a database:
 
@@ -77,7 +77,7 @@ Exit psql:
 \q
 ```
 
-### 4. Create the configuration file
+### 5. Create the configuration file
 
 Create a configuration file named **`.gatorconfig.json`** in your **home directory**:
 
@@ -97,7 +97,7 @@ Example structure:
 
 > Make sure the file exists and contains a valid database URL before running the application.
 
-### 5. Clone the repository
+### 6. Clone the repository
 
 Clone this project from GitHub:
 
@@ -106,7 +106,7 @@ git clone https://github.com/<your-username>/<your-repo>.git
 cd <your-repo>
 ```
 
-### 6. Run database migrations
+### 7. Run database migrations
 
 From the project root directory, run the migration files to initialize the database schema:
 
