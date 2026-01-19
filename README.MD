@@ -1,5 +1,6 @@
-# Blog Aggregator (Go) gator
+# Blog Aggregator (Go) 
 
+This is a command-line RSS reader inspired by the original `gator` CLI.
 A blog aggregator written in **Go** that collects and stores blog data using **PostgreSQL**.
 
 ## Prerequisites
