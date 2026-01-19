@@ -1,4 +1,4 @@
-# Blog Aggregator (Go)
+# Blog Aggregator (Go) gator
 
 A blog aggregator written in **Go** that collects and stores blog data using **PostgreSQL**.
 
