@@ -2,11 +2,15 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/flogit2161/BlogAggregator/internal/config"
 	"github.com/flogit2161/BlogAggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 type state struct {
@@ -46,12 +50,41 @@ func scrapeFeeds(s *state) {
 		fmt.Println("Error marking feed")
 		return
 	}
-	fetchNext, err := fetchFeed(context.Background(), feed.Url)
+	feedData, err := fetchFeed(context.Background(), feed.Url)
 	if err != nil {
 		fmt.Println("Could not access feed via url")
 		return
 	}
-	for _, f := range fetchNext.Channel.Item {
-		fmt.Println(f.Title)
+
+	// Parse time.Time to sql.NullTime
+	for _, item := range feedData.Channel.Item {
+		publishedAt := sql.NullTime{}
+		if t, err := time.Parse(time.RFC1123Z, item.PubDate); err == nil {
+			publishedAt = sql.NullTime{
+				Time:  t,
+				Valid: true,
+			}
+		}
+
+		_, err = s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			FeedID:    feed.ID,
+			Title:     item.Title,
+			Description: sql.NullString{
+				String: item.Description,
+				Valid:  true,
+			},
+			Url:         item.Link,
+			PublishedAt: publishedAt,
+		})
+		if err != nil {
+			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+				continue
+			}
+			fmt.Printf("Couldn't create post: %v", err)
+			continue
+		}
 	}
 }
